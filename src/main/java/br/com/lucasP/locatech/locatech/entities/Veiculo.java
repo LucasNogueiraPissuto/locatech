@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode
 @ToString
 public class Veiculo {
-    private long id;
+    private Long id;
     private String marca;
     private String modelo;
     private String placa;
