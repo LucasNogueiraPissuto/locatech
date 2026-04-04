@@ -50,9 +50,9 @@ public class AluguelRepositoryImp implements AluguelRepository {
     public Integer save(Aluguel aluguel) {
         return this.jdbcClient
                 .sql("INSERT INTO alugueis (pessoa_id, veiculo_id, data_inicio, data_fim, valor_total) VALUES (:pessoaId, :veiculoId, :dataInicio, :dataFim, :valorTotal)")
-                .param("pessoaId", aluguel.getIdPessoa())
-                .param("veiculoId", aluguel.getIdVeiculo())
-                .param("dataInicio", aluguel.getDataIncio())
+                .param("pessoaId", aluguel.getPessoaId())
+                .param("veiculoId", aluguel.getVeiculoId())
+                .param("dataInicio", aluguel.getDataInicio())
                 .param("dataFim", aluguel.getDataFim())
                 .param("valorTotal", aluguel.getValorTotal())
                 .update();
@@ -63,9 +63,9 @@ public class AluguelRepositoryImp implements AluguelRepository {
         return this.jdbcClient
                 .sql("UPDATE alugueis SET pessoa_id = :pessoaId, veiculo_id = :veiculoId, data_inicio = :dataInicio, data_fim = :dataFim, valor_total = :valorTotal WHERE id = :id")
                 .param("id", id)
-                .param("pessoaId", aluguel.getIdPessoa())
-                .param("veiculoId", aluguel.getIdVeiculo())
-                .param("dataInicio", aluguel.getDataIncio())
+                .param("pessoaId", aluguel.getPessoaId())
+                .param("veiculoId", aluguel.getVeiculoId())
+                .param("dataInicio", aluguel.getDataInicio())
                 .param("dataFim", aluguel.getDataFim())
                 .param("valorTotal", aluguel.getValorTotal())
                 .update();

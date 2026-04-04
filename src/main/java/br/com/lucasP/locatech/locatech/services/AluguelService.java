@@ -1,10 +1,14 @@
 package br.com.lucasP.locatech.locatech.services;
 
+import br.com.lucasP.locatech.locatech.DTOs.AluguelRequestDto;
 import br.com.lucasP.locatech.locatech.entities.Aluguel;
 import br.com.lucasP.locatech.locatech.repositories.AluguelRepository;
+import br.com.lucasP.locatech.locatech.repositories.VeiculoRepository;
+import br.com.lucasP.locatech.locatech.services.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,9 +16,11 @@ import java.util.Optional;
 public class AluguelService {
 
     private final AluguelRepository aluguelRepository;
+    private final VeiculoRepository veiculoRepository;
 
-    public AluguelService(AluguelRepository aluguelRepository) {
+    public AluguelService(AluguelRepository aluguelRepository, VeiculoRepository veiculoRepository) {
         this.aluguelRepository = aluguelRepository;
+        this.veiculoRepository = veiculoRepository;
     }
 
     public List<Aluguel> findAll(int page , int size) {
@@ -23,12 +29,13 @@ public class AluguelService {
     }
 
     public Optional<Aluguel> findAluguelById(Long id){
-        return this.aluguelRepository.findById(id);
+        return Optional.ofNullable(this.aluguelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Aluguel não encontrado")));
     }
 
-    public void saveAluguel(Aluguel aluguel){
-        var save = this.aluguelRepository.save(aluguel);
-        Assert.state(save == 1, "Ocorreu um erro ao salvar o aluguel");
+    public void saveAluguel(AluguelRequestDto aluguel){
+        var AluguelEntity = calculaAluguel(aluguel);
+        var save = this.aluguelRepository.save(AluguelEntity);
+        Assert.state(save == 1, "Ocorreu um erro ao salvar o aluguel " + aluguel.pessoaId());
     }
 
     public void updateAluguel(Aluguel aluguel, Long id){
@@ -43,5 +50,14 @@ public class AluguelService {
         if (delete == 0) {
             throw new RuntimeException("Ocorreu um erro ao deletar o aluguel com id " + id);
         }
+    }
+
+    private Aluguel calculaAluguel(AluguelRequestDto aluguelRequestDto) {
+        var veiculo = this.veiculoRepository.findById(aluguelRequestDto.veiculoId())
+                .orElseThrow(() -> new RuntimeException("Veiculo não encontrado"));
+
+        var quantidadeDias = BigDecimal.valueOf(aluguelRequestDto.dataFim().getDayOfYear() - aluguelRequestDto.dataInicio().getDayOfYear());
+        var valor = veiculo.getValorDiaria().multiply(quantidadeDias);
+        return new Aluguel(aluguelRequestDto, valor);
     }
 }
